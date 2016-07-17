@@ -140,6 +140,7 @@ class Hand:
     #         move to point x.y within a specified tolerance
     #         WARNING: If it is impossible to move to x.y, this will infinite loop
     #         TODO: keep track of how long you've been waiting so you can fix that
+    #         Hello
     #         '''
     #         # convert x, y from Unity item units (whatever they are) to detailed vision units (0.0 - 30.20)
     #         x = -2.25 + float(x)*0.148
