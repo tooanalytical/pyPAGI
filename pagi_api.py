@@ -8,16 +8,14 @@ import threading
 #import thread
 
 #connects the socket. Returns the socket that you will need.
-def connectSocket(ip=None,port=42209):
+def connectSocket(ip_address=None,port=42209):
     # connect to local address
-    if ip==None:
-        IP_ADDRESS = socket.gethostbyname(socket.gethostname())
-    else:
-        IP_ADDRESS = ip
-    clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    clientsocket.connect((IP_ADDRESS, port))
-    clientsocket.setblocking(0)
-    return clientsocket
+    if ip_address is None:
+        ip_address = socket.gethostbyname(socket.gethostname())
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((ip_address, port))
+    client_socket.setblocking(0)
+    return client_socket
 
 
 def closeClient(clientsocket):
