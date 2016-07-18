@@ -42,24 +42,24 @@ def send(msg, clientsocket):
 
 
 
-    messageType = msg.split('\n')[0].split(',')[1]
+    #messageType = msg.split('\n')[0].split(',')[1]
 
-    global unread
-    while True:
-         # update unread with responses from socket
-         readable = select.select([clientsocket], [], [], 1)
-         if readable[0]:
-             # read message and add to messages
-             responses = decode(clientsocket.recv(8192)).split('\n')    # limit of 8192 characters
-             for response in responses:
-                 if response != "":
-                     unread.append(response)
-         # search unread messages for match with current call; remove and return if found
-         for message in unread:
-             responseType = message.split(',')[0]
-             if responseType == messageType:
-                 unread.remove(message)
-                 return message
+    #global unread
+    #while True:
+    #     # update unread with responses from socket
+    #     readable = select.select([clientsocket], [], [], 1)
+    #     if readable[0]:
+    #         # read message and add to messages
+    #         responses = decode(clientsocket.recv(8192)).split('\n')    # limit of 8192 characters
+    #         for response in responses:
+    #             if response != "":
+    #                 unread.append(response)
+    #     # search unread messages for match with current call; remove and return if found
+    #     for message in unread:
+    #         responseType = message.split(',')[0]
+    #         if responseType == messageType:
+    #             unread.remove(message)
+    #             return message
 
 #socket = socket object to send to
 #timeout = timeout, in ms
