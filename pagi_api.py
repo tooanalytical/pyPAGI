@@ -61,14 +61,18 @@ def send(msg, clientsocket):
 
 #socket = socket object to send to
 #timeout = timeout, in ms
-def getMessages(socket):
-    readable = select.select([socket], [], [], 0.25)  #timeout/1000)
+
+def receive(clientsocket):
+    readable = select.select([clientsocket], [], [], 0.25)  # timeout/1000)
     if readable[0]:
         # read message and add to messages
-        ms = socket.recv(8192).decode("UTF8")
-        responses = ms.split('\n')  # limit of 8192 characters
+        responses = decode(clientsocket.recv(8192)).split('\n')  # limit of 8192 characters
+        responses = [c for c in responses if c != ""]
+        responses = responses[0].split(',')
+        # responses = [c for c in responses if c != ""]
+        print(responses)
+
         return responses
-    return []
 
 def encode(command):
     byte = str.encode(command)
@@ -387,17 +391,6 @@ class Agent:
         else:
             return rotation % (2 * math.pi)
 
-    def receive(self):
-        readable = select.select([self.clientsocket], [], [], 0.25)  # timeout/1000)
-        if readable[0]:
-            # read message and add to messages
-            responses = decode(self.clientsocket.recv(8192)).split('\n')  # limit of 8192 characters
-            responses = [c for c in responses if c != ""]
-            responses = responses[0].split(',')
-            #responses = [c for c in responses if c != ""]
-            print(responses)
-
-            return responses
 
     def rotate(self, val, degrees=True, absolute=True):
         '''
