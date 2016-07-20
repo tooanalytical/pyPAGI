@@ -1,58 +1,47 @@
-import time
-import math
-import random
+from __future__ import print_function
 from pagi_api import *
+import random
 
-cs = connectSocket("149.164.130.155", 42209)
+# If you leave it blank it will try to find the IP itself.
+# Otherwise, you can type in an IP manually:
+# cs = connectSocket(ip="128.113.243.43")
 
-#if you leave it blank, it will try to find the IP itself. Otherwise, you can
-#type in an IP manually:
-#cs = connectSocket(ip="128.113.243.43") 
+# You can also type a port if you're not using the default 42209:
+# cs = connectSocket(ip="128.113.243.43", port=230)
 
-#you can also type a port if you're not using the default 42209:
-#cs = connectSocket(ip="128.113.243.43", port=230)
+# Create an interface to talk to the agent through.
+cs = connect_socket("149.164.130.155", 42209)
 
-#create an agent and bind it to the port you just opened
+# Create an agent and bind it to the port you just opened.
 agent = Agent(cs)
 
 vision = Vision(cs)
 
 while True:
-    #MAIN LOOP.
-    
-    #check any new messages that were sent
+    # Check any new messages that were sent
     responses = receive(cs)
     for r in responses:
-        print ("Message received: " + str(r))
-            
-    #Do whatever you want: send messages, etc.
-    #here we make him jump with probability 10%, otherwise we print "not".
-    
-    #x = GameObject(agent, apple, 0, 0, 1)
-    
-    #agent.sendForce(10, 10)
-    
+        print("Message received: " + str(r))
+
+    # x = GameObject(agent, apple, 0, 0, 1)
     
     if random.random() < 0.5:
-        #agent.findObject('apple')
-        #agent.jump()
-        #agent.lhand.sendForce(-500, 300)
-        #agent.resetRotation()
-        #agent.moveH()
-        #print(agent.lhand.getCoordinates())
-        #print(agent.lhand.getDist(0,0))
-        #agent.lhand.grab()
-        #agent.lhand.release()
-        #vision.update()
-        print(vision.vision)
-        print(vision.getObject("bacon"))
+        # agent.find_object('apple')
+        # agent.jump()
+        # agent.left_hand.send_force(-500, 300)
+        # agent.reset_rotation()
+        # agent.moveH()
+        # print(agent.left_hand.get_coordinates())
+        # print(agent.left_hand.get_distance(0, 0))
+        # agent.left_hand.grab()
+        # agent.left_hand.release()
+        # vision.update()
+        # # print(vision.vision)
+        # print(vision.get_object("bacon"))
         pass
-
     else:
-        print ("not")
+        print("not")
 
-#agent.resetRotation()
+# agent.resetRotation()
 
-closeClient(cs)
-
-exit()
+close_client(cs)
