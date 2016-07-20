@@ -14,34 +14,34 @@ cs = connect_socket("149.164.130.155", 42209)
 
 # Create an agent and bind it to the port you just opened.
 agent = Agent(cs)
+try:
+    while True:
+        # Check any new messages that were sent
+        responses = receive(cs)
+        for r in responses:
+            print("Message received: " + str(r))
 
-vision = Vision(cs)
+        # x = GameObject(agent, apple, 0, 0, 1)
 
-while True:
-    # Check any new messages that were sent
-    responses = receive(cs)
-    for r in responses:
-        print("Message received: " + str(r))
+        if random.random() < 0.5:
+            # agent.find_object('apple')
+            # agent.jump()  # WORKING
+            # agent.left_hand.send_force(-50000, 30000) # WORKING
+            # agent.right_hand.send_force(50000, -30000)  # WORKING
+            # agent.reset_rotation() # WORKING
+            agent.move_agent(-5) # WORKING
+            # print(agent.left_hand.get_coordinates()) # WORKING
+            # print(agent.left_hand.get_distance(0, 0)) # WORKING
+            # agent.left_hand.grab()
+            # agent.left_hand.release()
+            # vision.update()
+            # print(vision.vision)
+            # print(vision.get_object("bacon"))
+            # agent.left_hand.move_hand(30, 50)
+            pass
+        else:
+            print("not")
 
-    # x = GameObject(agent, apple, 0, 0, 1)
-    
-    if random.random() < 0.5:
-        # agent.find_object('apple')
-        # agent.jump()
-        # agent.left_hand.send_force(-500, 300)
-        # agent.reset_rotation()
-        # agent.moveH()
-        # print(agent.left_hand.get_coordinates())
-        # print(agent.left_hand.get_distance(0, 0))
-        # agent.left_hand.grab()
-        # agent.left_hand.release()
-        # vision.update()
-        # # print(vision.vision)
-        # print(vision.get_object("bacon"))
-        pass
-    else:
-        print("not")
-
-# agent.resetRotation()
-
-close_client(cs)
+    agent.reset_rotation()
+finally:
+    close_client(cs)

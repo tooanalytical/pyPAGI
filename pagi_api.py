@@ -154,6 +154,7 @@ class Hand:
         :return:
         """
         # TODO: Keep track of how long the function has been looping so it doesn't loop forever.
+        # TODO: Fix this function! Continues the move the hand to the desired position.
 
         # Convert (x,y) from Unity item units (whatever they are) to detailed vision units (0.0 - 30.20)
         x = -2.25 + x*0.148
@@ -383,7 +384,7 @@ class Agent:
         This can also be accomplished by passing 0 to `rotate` as its rotation_value parameter
         :return: None
         """
-        # r = self.get_rotation()
+        r = self.get_rotation()
         self.rotate(0)
 
     def get_rotation(self, degrees=True):
@@ -397,7 +398,7 @@ class Agent:
         rotation = float(response[1])
         return (rotation*180/math.pi) % 360 if degrees else rotation % (2*math.pi)
 
-    def rotate(self, rotation_value, degrees=True, absolute_angle=False):
+    def rotate(self, rotation_value, degrees=True, absolute_angle=True):
         """
         Rotates the agent to the given angle either relative to its current angle or relative to the world-space.
               0
@@ -420,7 +421,7 @@ class Agent:
         send('addForce,LHH,0.01\n', self.client_socket)
         send('addForce,RHH,0.01\n', self.client_socket)
 
-    def move_hand(self, paces):
+    def move_agent(self, paces):
         """
         Moves the agent the specified number of paces where one pace equals the width of the body of the agent.
         If the number of paces is negative, the hand will move to the left.
