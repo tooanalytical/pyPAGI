@@ -220,6 +220,34 @@ class GameObject:
         return self.name == other
 
 
+class Items:
+    """
+    Contains functions responsible for creating items in the world in real-time.
+    """
+    # TODO: finish implementing drop_item and create_item functions
+
+    def __init__(self, client_socket):
+        self.client_socket = client_socket
+
+    def drop_item(self, name, x, y):
+        self.name = name
+        self.x = x
+        self.y = y
+        send('dropItem,apple,10,10\n', self.client_socket)
+        # send('dropItem,{name},{x},{y}\n'.format(name=self.name, x=self.x, y=self.y))
+
+    def create_item(self, file_path, x, y, mass, physics, initial_rotation, endorphins, kinematic_properties):
+        self.file_path = file_path
+        self.x = x
+        self.y = y
+        self.mass = mass
+        self.physics = physics
+        self.init_rotation = initial_rotation
+        self.endorphins = endorphins
+        self.kinematic_properties = kinematic_properties
+        send('createItem,{fp},{x},{y},{m},{phy},{init_rot},{endor},{k_prop}'.format(fp=self.file_path, x=self.x, y=self.y, m=self.mass, phy=self.physics, init_rot=self.init_rotation, endor=self.endorphins, k_prop=self.kinematic_properties))
+
+
 class Vision:
     """
     Controls the vision of the agent.
