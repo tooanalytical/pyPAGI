@@ -10,7 +10,7 @@ import random
 # cs = connectSocket(ip="128.113.243.43", port=230)
 
 # Create an interface to talk to the agent through.
-cs = connect_socket("25.10.181.48", 42209)
+cs = connect_socket("149.164.130.155", 42209)
 
 # Create an agent and bind it to the port you just opened.
 # agent = Agent(cs)
@@ -40,8 +40,8 @@ try:
             # print(vision.get_object("bacon"))
             # agent.left_hand.move_hand(30, 50)
             # agent.bring_hand_close(left_or_right = 'R')
-            item.drop_item('apple', 10, 10) # ACTIVELY WORKING ON THIS FUNCTION
-            item.create_item() # WORKING ON THIS FUNCTION NEXT
+            # item.drop_item('apple', 10, 10) # WORKING
+            # item.create_item() # WORKING ON THIS FUNCTION NEXT
             break
         else:
             print("not")

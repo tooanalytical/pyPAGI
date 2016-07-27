@@ -224,7 +224,7 @@ class Items:
     """
     Contains functions responsible for creating items in the world in real-time.
     """
-    # TODO: finish implementing drop_item and create_item functions
+    # TODO: finish implementing create_item function
 
     def __init__(self, client_socket):
         self.client_socket = client_socket
@@ -233,8 +233,7 @@ class Items:
         self.name = name
         self.x = x
         self.y = y
-        send('dropItem,apple,10,10\n', self.client_socket)
-        # send('dropItem,{name},{x},{y}\n'.format(name=self.name, x=self.x, y=self.y))
+        send('dropItem,{name},{x},{y}\n'.format(name=self.name, x=self.x, y=self.y), self.client_socket)
 
     def create_item(self, file_path, x, y, mass, physics, initial_rotation, endorphins, kinematic_properties):
         self.file_path = file_path
