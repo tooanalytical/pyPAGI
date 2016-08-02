@@ -13,8 +13,20 @@ import random
 cs = connect_socket("149.164.130.155", 42209)
 
 # Create an agent and bind it to the port you just opened.
-# agent = Agent(cs)
+agent = Agent(cs)
 item = Items(cs)
+
+def read_file(filepath, trans_x, trans_y):
+    with open(filepath, 'r') as the_file:
+        for y,line in enumerate(reversed(list(the_file))):
+            for x,character in enumerate(line):
+                if character == '1':
+                    item.create_item('wall'+str(x)+'_'+str(y), '/Users/brandonyoung/Desktop/brickWall.jpg', x+trans_x, y+trans_y)
+                if character ==  '2':
+                    item.create_item('roomba','/Users/brandonyoung/Desktop/roomba.jpeg', 3*(x+trans_x), 3*(y+trans_y))
+
+read_file('/Users/brandonyoung/Desktop/TestStream.txt', -30, 3)
+
 try:
     while True:
         # Check any new messages that were sent
@@ -41,7 +53,7 @@ try:
             # agent.left_hand.move_hand(30, 50)
             # agent.bring_hand_close(left_or_right = 'R')
             # item.drop_item('apple', 10, 10) # WORKING
-            # item.create_item() # WORKING ON THIS FUNCTION NEXT
+            # item.create_item('wall2', '/Users/brandonyoung/Desktop/brickWall.jpg', '13', '11', '50', '1', '0', '0', '0')
             break
         else:
             print("not")

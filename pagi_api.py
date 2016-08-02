@@ -224,27 +224,19 @@ class Items:
     """
     Contains functions responsible for creating items in the world in real-time.
     """
-    # TODO: finish implementing create_item function
+    # TODO: finish implementing create_item functions
 
     def __init__(self, client_socket):
         self.client_socket = client_socket
 
     def drop_item(self, name, x, y):
-        self.name = name
-        self.x = x
-        self.y = y
-        send('dropItem,{name},{x},{y}\n'.format(name=self.name, x=self.x, y=self.y), self.client_socket)
+        send('dropItem,{name},{x},{y}\n'.format(name=name, x=x, y=y), self.client_socket)
 
-    def create_item(self, file_path, x, y, mass, physics, initial_rotation, endorphins, kinematic_properties):
-        self.file_path = file_path
-        self.x = x
-        self.y = y
-        self.mass = mass
-        self.physics = physics
-        self.init_rotation = initial_rotation
-        self.endorphins = endorphins
-        self.kinematic_properties = kinematic_properties
-        send('createItem,{fp},{x},{y},{m},{phy},{init_rot},{endor},{k_prop}'.format(fp=self.file_path, x=self.x, y=self.y, m=self.mass, phy=self.physics, init_rot=self.init_rotation, endor=self.endorphins, k_prop=self.kinematic_properties))
+    def create_item(self, name, file_path, x, y, mass=50, physics=1,
+                    initial_rotation=0, endorphins=0, kinematic_properties=0):
+        send('createItem,{name},{fp},{x},{y},{m},{phy},{init_rot},{endorphins},{k_prop}\n'.format(name=name,
+            fp=file_path, x=x, y=y, m=mass, phy=physics,
+            init_rot=initial_rotation, endorphins=endorphins, k_prop=kinematic_properties), self.client_socket)
 
 
 class Vision:
