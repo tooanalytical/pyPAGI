@@ -85,6 +85,9 @@ def decode(bytes_object):
     #             return message
 
 
+
+
+
 class Body:
     """
     UNIMPLEMENTED
@@ -142,7 +145,7 @@ class Hand:
         :return: The euclidean distance to the point given.
         """
         x0, y0 = self.get_coordinates()
-        return math.sqrt((x0-x)**2+(y0-y)**2)
+        return math.sqrt((x0 - x) ** 2 + (y0 - y) ** 2)
 
     def move_hand(self, x, y, tolerance=1.5):
         """
@@ -157,8 +160,8 @@ class Hand:
         # TODO: Fix this function! Continues the move the hand to the desired position.
 
         # Convert (x,y) from Unity item units (whatever they are) to detailed vision units (0.0 - 30.20)
-        x = -2.25 + x*0.148
-        y = 1.65 + y*0.1475
+        x = -2.25 + x * 0.148
+        y = 1.65 + y * 0.1475
 
         hand = self.hand
 
@@ -224,6 +227,7 @@ class Items:
     """
     Contains functions responsible for creating items in the world in real-time.
     """
+
     # TODO: finish implementing create_item functions
 
     def __init__(self, client_socket):
@@ -235,14 +239,20 @@ class Items:
     def create_item(self, name, file_path, x, y, mass=50, physics=1,
                     initial_rotation=0, endorphins=0, kinematic_properties=0):
         send('createItem,{name},{fp},{x},{y},{m},{phy},{init_rot},{endorphins},{k_prop}\n'.format(name=name,
-            fp=file_path, x=x, y=y, m=mass, phy=physics,
-            init_rot=initial_rotation, endorphins=endorphins, k_prop=kinematic_properties), self.client_socket)
+                                                                                                  fp=file_path, x=x,
+                                                                                                  y=y, m=mass,
+                                                                                                  phy=physics,
+                                                                                                  init_rot=initial_rotation,
+                                                                                                  endorphins=endorphins,
+                                                                                                  k_prop=kinematic_properties),
+             self.client_socket)
 
 
 class Vision:
     """
     Controls the vision of the agent.
     """
+
     # TODO: consider storing self.objects as a dictionary for faster retrieval and just generally clean up this mess...
 
     def __init__(self, client_socket):
@@ -271,7 +281,7 @@ class Vision:
         perception = response.split(",")
         # Parse received input into a matrix which represents the visual perception of the agent.
         # Start at one to skip the included MDN.
-        self.vision = [perception[i:i+x0] for i in range(1, len(perception), y0)]
+        self.vision = [perception[i:i + x0] for i in range(1, len(perception), y0)]
 
         # Potential alternative to existing function. Still needs a lot more work.
         # currently_detected_objects = set([item for row in self.vision[:y0] for item in set(row[:x0]) if item])
@@ -380,6 +390,14 @@ class Agent:
         self.vision = Vision(self.client_socket)
         self.body = Body(self.client_socket)
 
+    def say(self, message, speaker='P', duration=3, pos_x=0, pos_y=10):
+        send('say,{speaker},{text},{duration},{posX},{posY}\n'.format(speaker=speaker, text=message,
+                                                                        duration=duration, posX=pos_x, posY=pos_y),
+             self.client_socket)
+
+    def send_text(self, message):
+        send('print,{message}\n'.format(message=message), self.client_socket)
+
     def find_object(self, name):
         """
         Search for an object with the given name.
@@ -415,7 +433,7 @@ class Agent:
         send('sensorRequest,A\n', self.client_socket)
         response = receive(self.client_socket, split_on_comma=True, return_first_response=True)
         rotation = float(response[1])
-        return (rotation*180/math.pi) % 360 if degrees else rotation % (2*math.pi)
+        return (rotation * 180 / math.pi) % 360 if degrees else rotation % (2 * math.pi)
 
     def rotate(self, rotation_value, degrees=True, absolute_angle=True):
         """
@@ -430,7 +448,7 @@ class Agent:
         """
         if not degrees:
             # Convert to degrees since that is what PAGI World uses to represent rotation by default.
-            rotation_value *= 180/math.pi
+            rotation_value *= 180 / math.pi
         if absolute_angle:
             # Convert global direction to relative direction
             rotation_value -= self.get_rotation()
