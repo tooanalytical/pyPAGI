@@ -331,6 +331,7 @@ class Vision:
         """
         for item in self.objects:
             if item.name == name:
+
                 return item
         return None
 
@@ -376,6 +377,7 @@ class Vision:
             return None
         x_coordinate = x_sum / number_of_coordinates
         y_coordinate = y_sum / number_of_coordinates
+        print(x_coordinate, y_coordinate)
         return x_coordinate, y_coordinate
 
 
@@ -404,8 +406,7 @@ class Agent:
         :param name:
         :return:
         """
-        # TODO: Implement this function.
-        send("findObj,{name},P".format(name=name))
+        send("findObj,{name},P\n".format(name=name), self.client_socket)
         response = receive(self.client_socket)
         print(response)
 

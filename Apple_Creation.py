@@ -162,27 +162,8 @@ def pagi_test():
 
             # x = GameObject(agent, apple, 0, 0, 1)
 
-            if random.random() < 0.9:
-                # agent.find_object('apple')
-                # agent.jump()  # WORKING
-                # agent.left_hand.send_force(-50000, 30000) # WORKING
-                # agent.right_hand.send_force(50000, -30000)  # WORKING
-                # agent.reset_rotation() # WORKING
-                # agent.move_agent(-5) # WORKING
-                # print(agent.left_hand.get_coordinates()) # WORKING
-                # print(agent.left_hand.get_distance(0, 0)) # WORKING
-                # agent.left_hand.grab()
-                # agent.left_hand.release()
-                # vision.update()
-                # print(vision.vision)
-                # print(vision.get_object("bacon"))
-                # agent.left_hand.move_hand(30, 50)
-                # agent.bring_hand_close(left_or_right = 'R')
-                # item.drop_item('apple', 10, 10) # WORKING
-                # item.create_item('wall1', '/home/robolab/Desktop/brickWall.jpg', '13', '11', '50', '1', '0', '0', '0')
-                # agent.send_text('hello there')
-                # agent.say('hi there')
-                agent.send_text('hello')
+            if random.random() < 0.99:
+                item.drop_item('apple', 15, 10)
                 break
             else:
                 print("not")
