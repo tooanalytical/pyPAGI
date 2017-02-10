@@ -4,6 +4,7 @@ import time
 import math
 import select
 import sys
+import json
 
 unread = []  # stores all unread messages from socket
 
@@ -39,6 +40,9 @@ def close_client(client_socket):
 
 
 def send(message, client_socket, encode_message=True, return_response=False):
+
+    # TODO: Implement JSON to send strings as JSON objects
+
     """
     WARNING: seems to randomly ignore responses from the socket, causing an infinite loop
     (possibly) PREVENTS client_socket.recv FROM WORKING OUTSIDE THIS FUNCTION

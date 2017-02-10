@@ -25,14 +25,15 @@ def main():
         # agent.jump()
         # agent.left_hand.apply_force(-500, 300)
         # agent.reset_rotation()
-        print(agent.left_hand.get_coordinates())
-        print(agent.left_hand.get_distance(0, 0))
+        # print(agent.left_hand.get_coordinates())
+        # print(agent.left_hand.get_distance(0, 0))
         # agent.left_hand.grab()
         # agent.left_hand.release()
         # agent.vision.update()
         # print(agent.left_hand.move_to(0,0))
         # print(vision.vision)
         # print(agent.vision.get_object("bacon"))
+        Items.drop_item()
 
     # agent.resetRotation()
 
