@@ -33,7 +33,7 @@ def main():
         # print(agent.left_hand.move_to(0,0))
         # print(vision.vision)
         # print(agent.vision.get_object("bacon"))
-        Items.drop_item(item)
+        Items.drop_item(agent.body, 'apple', 10, 10)
 
     # agent.resetRotation()
 

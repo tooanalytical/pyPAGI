@@ -298,8 +298,6 @@ class Items:
     Contains functions responsible for creating items in the world in real-time.
     """
 
-    # TODO: finish implementing create_item functions
-
     def __init__(self, client_socket):
         self.client_socket = client_socket
 
@@ -453,7 +451,7 @@ class Vision:
                     number_of_coordinates += 1
         if number_of_coordinates == 0:
             return None
-        # Wtffffffffff is this shit
+        # Why is this writen this way?
         x_coordinate = x_sum / number_of_coordinates
         y_coordinate = y_sum / number_of_coordinates
         return x_coordinate, y_coordinate
