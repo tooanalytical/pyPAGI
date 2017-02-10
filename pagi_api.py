@@ -458,6 +458,40 @@ class Vision:
         y_coordinate = y_sum / number_of_coordinates
         return x_coordinate, y_coordinate
 
+    class States:
+        """
+        Contains functions responsible for setting states.
+        """
+
+        def __init__(self, client_socket):
+            self.client_socket = client_socket
+
+        def get_states(self):
+            send('getActiveStates\n', self.client_socket)
+
+        def set_state(self, name, duration=-1):
+            send('setState,{name},{duration}\n'.format(name=name, duration=duration), self.client_socket)
+
+        def remove_state(self, name):
+            send('setState,{name},0\n'.format(name=name), self.client_socket)
+
+    class Reflexs:
+        """
+        Contains functions responsible for setting reflexes.
+        """
+
+        def __init__(self, client_socket):
+            self.client_socket = client_socket
+
+        def get_reflexes(self):
+            send('getActiveReflexes\n', self.client_socket)
+
+        def set_reflex(self, name, x, y):
+            send('setReflex,{name},{x},{y}\n'.format(name=name, x=x, y=y), self.client_socket)
+
+        def remove_reflex(self, name):
+            send('setReflex,{name}\n'.format(name=name), self.client_socket)
+
 
 # ==================================================================
 # ===============================AGENT==============================
@@ -497,8 +531,8 @@ class Agent:
     def send_force(self, x, y):
         send('addForce,BMvec,{x},{y}\n'.format(x=x, y=y), self.client_socket, return_response=True)
 
-    def jump(self):
-        send('addForce,J,30000\n', self.client_socket, return_response=True)
+    def jump(self, force):
+        send('addForce,J,{force]\n'.format(force=force), self.client_socket, return_response=True)
 
     def reset_rotation(self):
         """
