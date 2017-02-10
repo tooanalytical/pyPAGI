@@ -55,14 +55,22 @@ def send(message, client_socket, encode_message=True, return_response=False):
     :return: The response from the server is return_response is True, otherwise None.
     """
     if encode_message:
-        message = encode(message)
+        message = json.loads(encode(message))
+        """
+        Below is previous implementation of send encoding
+        """
+        # message = encode(message)
     try:
         client_socket.send(message)
     except BrokenPipeError:
         print("The socket connection was reset. Please rerun the program.")
         sys.exit(1)
     if return_response:
-        return receive(client_socket)
+        return json.JSONDecoder(receive(client_socket))
+        """
+        Below is previous implementation of return response decoding
+        """
+        # return receive(client_socket)
 
 
 def receive(client_socket, split_on_comma=False,
