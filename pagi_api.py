@@ -55,22 +55,14 @@ def send(message, client_socket, encode_message=True, return_response=False):
     :return: The response from the server is return_response is True, otherwise None.
     """
     if encode_message:
-        message = json.loads(encode(message))
-        """
-        Below is previous implementation of send encoding
-        """
-        # message = encode(message)
+        message = encode(message)
     try:
         client_socket.send(message)
     except BrokenPipeError:
         print("The socket connection was reset. Please rerun the program.")
         sys.exit(1)
     if return_response:
-        return json.JSONDecoder(receive(client_socket))
-        """
-        Below is previous implementation of return response decoding
-        """
-        # return receive(client_socket)
+        return receive(client_socket)
 
 
 def receive(client_socket, split_on_comma=False,
@@ -319,6 +311,8 @@ class Items:
                      init_rot=initial_rotation, endorphins=endorphins, k_prop=kinematic_properties),
              self.client_socket)
 
+    # TODO: Implement addForceToItem
+    # TODO: Implement getInfoAboutItem
 
 class Vision:
     """
@@ -475,18 +469,16 @@ class Vision:
         def get_states(self):
             send('getActiveStates\n', self.client_socket)
 
-        def set_state(self, name, duration=-1):
+        def set_state(self, name, duration):
             send('setState,{name},{duration}\n'.format(name=name, duration=duration), self.client_socket)
 
         def remove_state(self, name):
             send('setState,{name},0\n'.format(name=name), self.client_socket)
 
-    class Reflexs:
+    class Reflexes:
         """
         Contains functions responsible for setting reflexes.
         """
-
-        # TODO: Implement optional listings (i.e [,A])
 
         def __init__(self, client_socket):
             self.client_socket = client_socket
@@ -494,8 +486,12 @@ class Vision:
         def get_reflexes(self):
             send('getActiveReflexes\n', self.client_socket)
 
-        def set_reflex(self, name, condition):
-            send('setReflex,{name},{condition}\n'.format(name=name, condition=condition), self.client_socket)
+        def set_reflex(self, name, condition, option=None):
+            if option is None:
+                send('setReflex,{name},{condition}\n'.format(name=name, condition=condition), self.client_socket)
+            else:
+                send('setReflex,{name},{condition},[{option}]\n'.format(name=name, condition=condition, option=option),
+                     self.client_socket)
 
         def remove_reflex(self, name):
             send('setReflex,{name}\n'.format(name=name), self.client_socket)
