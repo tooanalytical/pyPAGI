@@ -22,7 +22,7 @@ def main():
         time.sleep(0.01)
 
         # print(agent.find_object('steak'))
-        # agent.jump(30000)
+        agent.jump(30000)
         # agent.left_hand.apply_force(-500, 300)
         # agent.reset_rotation()
         # print(agent.left_hand.get_coordinates())

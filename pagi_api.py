@@ -118,7 +118,9 @@ class Body:
         self.sensors = [None] * 8
 
     def apply_force(self, x, y):
-        send('addForce,BHvec,{x},{y}\n'.format(x=x, y=y), self.client_socket, return_response=True)
+        addForce = {"Command": "addForce", "Effector": "BHvec", "HorizontalForce": str(x), "VerticalForce": str(y)}
+        send(json.dumps(addForce) + '\n', self.client_socket, return_response=True)
+        # send('addForce,BHvec,{x},{y}\n'.format(x=x, y=y), self.client_socket, return_response=True)
 
     def get_sensor(self, index=None):
         """
@@ -145,7 +147,9 @@ class Body:
                 pain object, then it will return a negative value
         """
         if index is not None:
-            send('sensorRequest,B{n}\n'.format(n=index), self.client_socket)
+            send(json.dumps({"Command": "sensorRequest", "Sensor": str.join('', ["B", index])}) + '\n',
+                 self.client_socket)
+            # send('sensorRequest,B{n}\n'.format(n=index), self.client_socket)
             response = receive(self.client_socket, split_on_comma=True)
             self.sensors[index] = response
         else:
@@ -173,7 +177,9 @@ class Hand:
         Considering allowing the coordinates to either be relative to the origin or relative to the agent.
         :return: (X, Y) coordinates of hand relative to body
         """
-        send('sensorRequest,{h}P\n'.format(h=self.hand), self.client_socket)
+        send(json.dumps({"Command": "sensorRequest", "Sensor": str.join('', [self.hand, "P"])}) + '\n',
+             self.client_socket)
+        # send('sensorRequest,{h}P\n'.format(h=self.hand), self.client_socket)
         current_location = receive(self.client_socket, split_on_comma=True, return_first_response=True)
         return float(current_location[1]), float(current_location[2])
 
@@ -188,7 +194,14 @@ class Hand:
         return math.sqrt((x0-x)*(x0-x)+(y0-y)*(y0-y))
 
     def apply_force(self, x, y):
-        send('addForce,{hand}Hvec,{x},{y}\n'.format(hand=self.hand, x=x, y=y), self.client_socket, return_response=True)
+        addForce = {
+            "Command": "addForce",
+            "Effector": str.join('', [self.hand, "Hvec"]),
+            "HorizontalForce": str(x),
+            "VerticalForce": str(y)
+        }
+        send(json.dumps(addForce) + '\n', self.client_socket, return_response=True)
+        # send('addForce,{hand}Hvec,{x},{y}\n'.format(hand=self.hand, x=x, y=y), self.client_socket, return_response=True)
 
     def move_to(self, x, y, tolerance=1.5):
         """
@@ -214,10 +227,57 @@ class Hand:
         # Might be fixed; it is a bit random.
         # Note that this is likely caused by not receiving the socket data for the reflex functions,
         # clogging up the socket's responses in send()
-        send('setReflex, lock{h}X,{h}Px|!|{x},sensorRequest|{h}P;addForce|{h}HH|[350*({x}-{h}Px)]\n'
-             .format(h=self.hand, x=x), self.client_socket, return_response=True)
-        send('setReflex, lock{h}Y,{h}Py|!|{y},sensorRequest|{h}P;addForce|{h}HV|[350*({y}-{h}Py)]\n'
-             .format(h=self.hand, y=y), self.client_socket, return_response=True)
+        setXLock = {
+            "Command": "setReflex",
+            "Name": str.join('', ["lock", self.hand, "X"]),
+            "SensoryConditions": [
+                {
+                    "Sensor": str.join('', [self.hand, "Px"]),
+                    "Comparator": "!",
+                    "Value": x
+                }
+            ],
+            "Actions": [
+                {
+                    "Command": "sensorRequest",
+                    "Sensor": str.join('', [self.hand, "P"])
+                },
+                {
+                    "Command": "addForce",
+                    "Effector": str.join('', [self.hand, "HH"]),
+                    "Force": str.join('', ["[350*(", x, "-", self.hand, "Px)]"])
+                }
+            ]
+        }
+        setYLock = {
+            "Command": "setReflex",
+            "Name": str.join('', ["lock", self.hand, "Y"]),
+            "SensoryConditions": [
+                {
+                    "Sensor": str.join('', [self.hand, "Py"]),
+                    "Comparator": "!",
+                    "Value": y
+                }
+            ],
+            "Actions": [
+                {
+                    "Command": "sensorRequest",
+                    "Sensor": str.join('', [self.hand, "P"])
+                },
+                {
+                    "Command": "addForce",
+                    "Effector": str.join('', [self.hand, "HV"]),
+                    "Force": str.join('', ["[350*(", y, "-", self.hand, "Py)]"])
+                }
+            ]
+        }
+
+        send(json.dumps(setXLock) + '\n', self.client_socket, return_response=True)
+        send(json.dumps(setYLock) + '\n', self.client_socket, return_response=True)
+        # send('setReflex, lock{h}X,{h}Px|!|{x},sensorRequest|{h}P;addForce|{h}HH|[350*({x}-{h}Px)]\n'
+        #      .format(h=self.hand, x=x), self.client_socket, return_response=True)
+        # send('setReflex, lock{h}Y,{h}Py|!|{y},sensorRequest|{h}P;addForce|{h}HV|[350*({y}-{h}Py)]\n'
+        #      .format(h=self.hand, y=y), self.client_socket, return_response=True)
 
         # Wait until sufficiently close, then return
         while self.get_distance(x, y) > tolerance:
@@ -229,8 +289,18 @@ class Hand:
         Apply grabbing force and update holding status
         :return: None
         """
-        send('addForce,{h}HG,5\n'.format(h=self.hand), self.client_socket, return_response=True)
-        send('sensorRequest,{h}2\n'.format(h=self.hand), self.client_socket)
+        addForce = {
+            "Command": "addForce",
+            "Effector": str.join('', [self.hand, "HG"])
+        }
+        senseReq = {
+            "Command": "sensorRequest",
+            "Sensor": str.join('', [self.hand, "2"])
+        }
+        send(json.dumps(addForce) + '\n', self.client_socket, return_response=True)
+        send(json.dumps(senseReq) + '\n', self.client_socket)
+        # send('addForce,{h}HG,5\n'.format(h=self.hand), self.client_socket, return_response=True)
+        # send('sensorRequest,{h}2\n'.format(h=self.hand), self.client_socket)
         response = receive(self.client_socket, split_on_comma=True, return_first_response=True)[1]
         self.closed = True
         if response == "1":
@@ -241,7 +311,12 @@ class Hand:
         Stop applying grabbing force and update holding status
         :return: None
         """
-        send('addForce,{h}HR,5\n'.format(h=self.hand), self.client_socket, return_response=True)
+        release = {
+            "Command": "addForce",
+            "Effector": str.join('', [self.hand, "HR"])
+        }
+        send(json.dumps(release) + '\n', self.client_socket, return_response=True)
+        # send('addForce,{h}HR,5\n'.format(h=self.hand), self.client_socket, return_response=True)
         self.closed = False
         self.holding_object = False
 
@@ -265,14 +340,22 @@ class Hand:
             • tx1-tx4 - The texture detected. This is four floats meant to describe the
                 quality of the texture.
         """
+        senseReq = {
+            "Command": "sensorRequest",
+            "Sensor": ''
+        }
         if index is not None:
-            send('sensorRequest,{hand}{n}\n'.format(hand=self.hand, n=index), self.client_socket)
+            senseReq["Sensor"] = str.join('', [self.hand, index])
+            send(json.dumps(senseReq) + '\n', self.client_socket)
+            # send('sensorRequest,{hand}{n}\n'.format(hand=self.hand, n=index), self.client_socket)
             response = receive(self.client_socket, split_on_comma=True)
             self.sensors[index] = response
         else:
             for index in range(5):
-                self.sensors[index] = send('sensorRequest,{hand}{n}\n'.format(hand=self.hand, n=index),
-                                           self.client_socket, return_response=True)
+                senseReq["Sensor"] = str.join('', [self.hand, index])
+                send(json.dumps(senseReq) + '\n', self.client_socket)
+                # self.sensors[index] = send('sensorRequest,{hand}{n}\n'.format(hand=self.hand, n=index),
+                #                            self.client_socket, return_response=True)
             response = self.sensors
         return response
 
@@ -302,14 +385,30 @@ class Items:
         self.client_socket = client_socket
 
     def drop_item(self, name, x, y):
-        send('dropItem,{name},{x},{y}\n'.format(name=name, x=x, y=y), self.client_socket)
+        send(json.dumps({"Command": "dropItem", "Name": name, "Position": {"x": x, "y": y}}) + '\n', self.client_socket)
+        # send('dropItem,{name},{x},{y}\n'.format(name=name, x=x, y=y), self.client_socket)
 
     def create_item(self, name, file_path, x, y, mass=50, physics=1,
                     initial_rotation=0, endorphins=0, kinematic_properties=0):
-        send('createItem,{name},{fp},{x},{y},{m},{phy},{init_rot},{endorphins},{k_prop}\n'
-             .format(name=name, fp=file_path, x=x, y=y, m=mass, phy=physics,
-                     init_rot=initial_rotation, endorphins=endorphins, k_prop=kinematic_properties),
-             self.client_socket)
+        createItem = {
+            "Command": "createItem",
+            "Name": name,
+            "FilePath": file_path,
+            "Position": {
+                "x": x,
+                "y": y
+            },
+            "Mass": 50,
+            "Friction": physics,
+            "Rotation": initial_rotation,
+            "Endorphins": endorphins,
+            "Kinematic": kinematic_properties
+        }
+        send(json.dumps(createItem) + '\n', self.client_socket)
+        # send('createItem,{name},{fp},{x},{y},{m},{phy},{init_rot},{endorphins},{k_prop}\n'
+        #      .format(name=name, fp=file_path, x=x, y=y, m=mass, phy=physics,
+        #              init_rot=initial_rotation, endorphins=endorphins, k_prop=kinematic_properties),
+        #      self.client_socket)
 
     # TODO: Implement addForceToItem
     # TODO: Implement getInfoAboutItem
@@ -346,9 +445,11 @@ class Vision:
 
         # get sensor reading
         if view_type == 'detailed':
-            send('sensorRequest,MDN\n', self.client_socket)
+            send(json.dumps({"Command": "sensorRequest", "Sensor": "MDN"}) + '\n', self.client_socket)
+            # send('sensorRequest,MDN\n', self.client_socket)
         else:
-            send('sensorRequest,MPN\n', self.client_socket)
+            send(json.dumps({"Command":"sensorRequest","Sensor":"MPN"})+'\n', self.client_socket)
+            # send('sensorRequest,MPN\n', self.client_socket)
         response = receive(self.client_socket)
         # print(response)
         if len(response) == 0:
@@ -458,6 +559,7 @@ class Vision:
         y_coordinate = y_sum / number_of_coordinates
         return x_coordinate, y_coordinate
 
+
     class States:
         """
         Contains functions responsible for setting states.
@@ -467,13 +569,29 @@ class Vision:
             self.client_socket = client_socket
 
         def get_states(self):
-            send('getActiveStates\n', self.client_socket)
+            get_state = {
+                "Command" : "getActiveStates"
+            }
+            send(json.dumps(get_state)+'\n', self.client_socket)
+            # send('getActiveStates\n', self.client_socket)
 
         def set_state(self, name, duration):
-            send('setState,{name},{duration}\n'.format(name=name, duration=duration), self.client_socket)
+            set_state = {
+                "Command": "setState",
+                "Name": name,
+                "Duration": duration
+            }
+            send(json.dumps(set_state)+'\n', self.client_socket)
+            # send('setState,{name},{duration}\n'.format(name=name, duration=duration), self.client_socket)
 
-        def remove_state(self, name):
-            send('setState,{name},0\n'.format(name=name), self.client_socket)
+        def remove_state(self, name, duration=0):
+            remove_state = {
+                "Command": "setState",
+                "Name": name,
+                "Duration": duration
+            }
+            send(json.dumps(remove_state)+'\n', self.client_socket)
+            # send('setState,{name},0\n'.format(name=name), self.client_socket)
 
     class Reflexes:
         """
@@ -484,17 +602,36 @@ class Vision:
             self.client_socket = client_socket
 
         def get_reflexes(self):
-            send('getActiveReflexes\n', self.client_socket)
+            get_reflexes = {
+                "Command": "getActiveReflexes"
+            }
+            send(json.dumps(get_reflexes) + '\n', self.client_socket)
+            # send('getActiveReflexes\n', self.client_socket)
 
         def set_reflex(self, name, condition, option=None):
-            if option is None:
-                send('setReflex,{name},{condition}\n'.format(name=name, condition=condition), self.client_socket)
-            else:
-                send('setReflex,{name},{condition},[{option}]\n'.format(name=name, condition=condition, option=option),
-                     self.client_socket)
+            set_reflex = {
+                "Command": "setReflex",
+                "Condition": condition,
+                "Option": option
+            }
+
+            send(json.dumps(set_reflex) + '\n', self.client_socket)
+
+            # OLD CODE...REVIEW IF NECESSARY AFTER JSON API WORKING
+            # if option is None:
+            #     send(json.dumps(set_reflex)+'\n', self.client_socket)
+                # send('setReflex,{name},{condition}\n'.format(name=name, condition=condition), self.client_socket)
+            # else:
+            #     send('setReflex,{name},{condition},[{option}]\n'.format(name=name, condition=condition, option=option),
+            #          self.client_socket)
 
         def remove_reflex(self, name):
-            send('setReflex,{name}\n'.format(name=name), self.client_socket)
+            remove_reflex = {
+                "Command": "removeReflex",
+                "Name": name
+            }
+            send(json.dumps(remove_reflex)+'\n', self.client_socket)
+            # send('removeReflex,{name}\n'.format(name=name), self.client_socket)
 
 
 # ==================================================================
@@ -529,14 +666,25 @@ class Agent:
                 • Rewards/Punishments: apple, bacon, redPill, bluePill, poison, steak
                 • Other: soldier, medkit
         """
-        send("findObj,{name},{mode}\n".format(name=name, mode=search_mode), self.client_socket)
+        send(json.dumps({"Command": "findObj", "Name": name, "Model": search_mode}) + '\n', self.client_socket)
+        # send("findObj,{name},{mode}\n".format(name=name, mode=search_mode), self.client_socket)
         return receive(self.client_socket, split_on_comma=True)
 
     def send_force(self, x, y):
-        send('addForce,BMvec,{x},{y}\n'.format(x=x, y=y), self.client_socket, return_response=True)
+        send(json.dumps(
+            {"Command": "addForce", "Effector": "BMvec", "HorizontalForce": str(x), "VerticalForce": str(y)}) + '\n',
+            self.client_socket, return_response=True)
+        # send('addForce,BMvec,{x},{y}\n'.format(x=x, y=y), self.client_socket, return_response=True)
 
-    def jump(self, force):
-        send('addForce,J,{force]\n'.format(force=force), self.client_socket, return_response=True)
+    def jump(self, force=30000):
+        jump = {
+            "Command": "addForce",
+            "Effector": "J",
+            "Force": force
+        }
+
+        send(json.dumps(jump) + '\n', self.client_socket, return_response=True)
+        # send('addForce,J,{force}\n'.format(force=force), self.client_socket, return_response=True)
 
     def reset_rotation(self):
         """
@@ -553,7 +701,8 @@ class Agent:
         :param degrees: Determines if the rotation will be returned in degrees or radians.
         :return: A degree or radian value that represents the current rotation of the agent.
         """
-        send('sensorRequest,A\n', self.client_socket)
+        send(json.dumps({"Command": "sensorRequest", "Sensor": "A"}) + '\n', self.client_socket)
+        # send('sensorRequest,A\n', self.client_socket)
         response = receive(self.client_socket, split_on_comma=True, return_first_response=True)
         rotation = float(response[1])
         return (rotation*180/math.pi) % 360 if degrees else rotation % (2*math.pi)
@@ -577,9 +726,16 @@ class Agent:
             rotation_value -= self.get_rotation()
         # Ensure that the rotation value is between 0 and 359.
         rotation_value %= 360
-        send('addForce,BR,{deg}\n'.format(deg=rotation_value), self.client_socket, return_response=True)
-        send('addForce,LHH,0.01\n', self.client_socket, return_response=True)
-        send('addForce,RHH,0.01\n', self.client_socket, return_response=True)
+
+        send(json.dumps({"Command": "addForce", "Effector": "BR", "Force": str(rotation_value)}) + '\n',
+             self.client_socket, return_response=True)
+        send(json.dumps({"Command": "addForce", "Effector": "LHH", "Force": str(.01)}) + '\n',
+             self.client_socket, return_response=True)
+        send(json.dumps({"Command": "addForce", "Effector": "RHH", "Force": str(.01)}) + '\n',
+             self.client_socket, return_response=True)
+        # send('addForce,BR,{deg}\n'.format(deg=rotation_value), self.client_socket, return_response=True)
+        # send('addForce,LHH,0.01\n', self.client_socket, return_response=True)
+        # send('addForce,RHH,0.01\n', self.client_socket, return_response=True)
 
     def move_hand(self, paces):
         """
@@ -590,7 +746,13 @@ class Agent:
         """
         force = paces and (1, -1)[paces < 0] * 10800
         for i in range(abs(paces)):
-            send("addForce,BMH,{force}\n".format(force=force), self.client_socket, return_response=True)
+            addForce = {
+                "Command": "addForce",
+                "Effector": "BMH",
+                "Force": force
+            }
+            send(json.dumps(addForce) + '\n', self.client_socket, return_response=True)
+            # send("addForce,BMH,{force}\n".format(force=force), self.client_socket, return_response=True)
             time.sleep(1.1)
 
     def grab_object(self, name, hand=None, tolerance=1.5):
@@ -652,8 +814,19 @@ class Agent:
         :param pos_y: The position of the speech bubble in the y direction, relative to the speaker.
         :return: None
         """
-        if ',' in text:
-            text = text.replace(',', '')
-        send("say,{speaker},{text},{duration},{posX},{posY}\n".format(speaker=speaker, text=text, duration=duration,
-                                                                      posX=pos_x, posY=pos_y),
-             self.client_socket, return_response=True)
+        # if ',' in text:
+        #     text = text.replace(',', '')
+
+        say = {
+            "Command": "say",
+            "Speaker": speaker,
+            "Text": text,
+            "Duration": duration,
+            "Position": {"x": pos_x, "y": pos_y}
+        }
+
+        send(json.dumps(say) + '\n', self.client_socket, return_response=True)
+
+        # send("say,{speaker},{text},{duration},{posX},{posY}\n".format(speaker=speaker, text=text, duration=duration,
+        #                                                               posX=pos_x, posY=pos_y),
+        #      self.client_socket, return_response=True)
